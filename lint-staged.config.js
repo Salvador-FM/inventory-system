@@ -1,7 +1,11 @@
 module.exports = {
   '**/*.{ts,tsx}': (filenames) => {
     const filtered = filenames.filter(
-      (f) => !f.includes('.spec.') && !f.includes('test/'),
+      (f) =>
+        !f.includes('.spec.') &&
+        !f.includes('test/') &&
+        !f.includes('next.config.') &&
+        !f.includes('next-env.d.'),
     );
     if (!filtered.length) return [];
     const files = filtered.map((f) => `"${f}"`).join(' ');
