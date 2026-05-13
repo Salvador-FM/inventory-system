@@ -9,7 +9,7 @@
     "experimentalDecorators": true,
     "types": ["node"],
     "paths": {
-      "@inventory/shared": ["../../packages/shared/src/index.ts"]
+      "@inventory/shared": ["../../packages/shared/src"]
     }
   },
   "include": ["src/**/*"],
