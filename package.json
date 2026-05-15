@@ -1,13 +1,13 @@
 {
   "name": "inventory-system",
   "private": true,
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "packageManager": "pnpm@11.1.2",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
-    "dev": "concurrently \"npm run dev -w apps/api\" \"npm run dev -w apps/web\"",
-    "build": "npm run build -w apps/api && npm run build -w apps/web",
+    "dev": "concurrently \"pnpm --filter api dev\" \"pnpm --filter web dev\"",
+    "build": "pnpm --filter api build && pnpm --filter web build",
     "lint": "eslint \"{apps,packages}/**/*.{ts,tsx}\"",
     "prepare": "husky",
     "lint:fix": "eslint \"{apps,packages}/**/*.{ts,tsx}\" --fix",
@@ -17,7 +17,7 @@
     "@typescript-eslint/eslint-plugin": "^8.20.0",
     "@typescript-eslint/parser": "^8.20.0",
     "concurrently": "^8.2.0",
-    "eslint": "^9.18.0",
+    "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-prettier": "^5.2.2",

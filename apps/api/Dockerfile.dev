@@ -2,11 +2,25 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+# Instalar pnpm
+RUN npm install -g pnpm
 
+# Copiar archivos raíz necesarios
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# Copiar package.json de workspaces
+COPY apps/api/package.json ./apps/api/package.json
+COPY packages/shared/package.json ./packages/shared/package.json
+
+# Instalar dependencias
+RUN pnpm install
+
+# Copiar resto del proyecto
 COPY . .
+
+# Ir al workspace api
+WORKDIR /app/apps/api
 
 EXPOSE 3001
 
-CMD ["npm", "run", "start:dev"]
+CMD ["pnpm", "run", "start:dev"]

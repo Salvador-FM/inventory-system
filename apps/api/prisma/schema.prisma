@@ -1,0 +1,176 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  WAREHOUSE
+  AUDITOR
+}
+
+enum MovementType {
+  ENTRADA
+  SALIDA
+  AJUSTE
+  TRANSFERENCIA
+}
+
+enum AlertStatus {
+  ACTIVE
+  RESOLVED
+}
+
+// ─── Models ──────────────────────────────────────────────
+
+model Branch {
+  id        String   @id @default(uuid())
+  name      String
+  address   String
+  zone      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  users        User[]
+  branchStocks BranchStock[]
+  movements    StockMovement[]
+  alerts       Alert[]
+
+  @@map("branches")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  role      Role     @default(WAREHOUSE)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
+
+  movements StockMovement[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Category {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Supplier {
+  id        String   @id @default(uuid())
+  name      String
+  contact   String
+  email     String   @unique
+  phone     String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  products  Product[]
+  movements StockMovement[]
+
+  @@map("suppliers")
+}
+
+model Product {
+  id          String  @id @default(uuid())
+  sku         String  @unique
+  name        String
+  description String?
+  price       Float
+  stockMin    Int     @default(10)
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  supplierId String
+  supplier   Supplier @relation(fields: [supplierId], references: [id])
+
+  branchStocks BranchStock[]
+  movements    StockMovement[]
+  alerts       Alert[]
+
+  @@index([sku])
+  @@index([categoryId])
+  @@map("products")
+}
+
+model BranchStock {
+  id        String   @id @default(uuid())
+  quantity  Int      @default(0)
+  updatedAt DateTime @updatedAt
+
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([branchId, productId])
+  @@index([branchId])
+  @@index([productId])
+  @@map("branch_stocks")
+}
+
+model StockMovement {
+  id        String       @id @default(uuid())
+  type      MovementType
+  quantity  Int
+  note      String?
+  createdAt DateTime     @default(now())
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  supplierId String?
+  supplier   Supplier? @relation(fields: [supplierId], references: [id])
+
+  @@index([branchId])
+  @@index([productId])
+  @@index([createdAt])
+  @@map("stock_movements")
+}
+
+model Alert {
+  id         String      @id @default(uuid())
+  status     AlertStatus @default(ACTIVE)
+  message    String
+  createdAt  DateTime    @default(now())
+  resolvedAt DateTime?
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  branchId String
+  branch   Branch @relation(fields: [branchId], references: [id])
+
+  @@index([status])
+  @@index([branchId])
+  @@map("alerts")
+}
